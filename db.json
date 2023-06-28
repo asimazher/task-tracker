@@ -1,18 +1,6 @@
 {
   "tasks": [
     {
-      "id": 1,
-      "text": "going to gym",
-      "day": "02 feb,2023",
-      "reminder": true
-    },
-    {
-      "id": 2,
-      "text": "going to office",
-      "day": "02 feb,2023",
-      "reminder": true
-    },
-    {
       "id": 3,
       "text": "going to home",
       "day": "02 feb,2023",
