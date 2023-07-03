@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./component/Header";
 import Tasks from "./component/Tasks";
 import AddTask from "./component/AddTask";
-import { method } from "lodash";
+import Footer from "./component/Footer";
+import About from "./component/About";
 
 function App() {
-  
   const [showAddTask, setShowAddTask] = useState(false);
 
   const [tasks, setTasks] = useState([]);
@@ -35,48 +36,41 @@ function App() {
   //Add Task
   const addTask = async (task) => {
     const res = await fetch("http://localhost:5000/tasks", {
-      method: 'POST',
-      headers:{
-        'content-type': 'application/json'
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
       },
-      body: JSON.stringify(task)
-    })
+      body: JSON.stringify(task),
+    });
 
-    const data = await res.json()
+    const data = await res.json();
 
-    setTasks([ ...tasks, data])
-
-    // const id = Math.floor(Math.random() * 1000) + 1;
-    // const newTask = { id, ...task };
-    // setTasks([...tasks, newTask]);
+    setTasks([...tasks, data]);
   };
 
   // Delete Task
   const deleteTask = async (id) => {
-    
     await fetch(`http://localhost:5000/tasks/${id}`, {
-      method: 'DELETE',
-    })
+      method: "DELETE",
+    });
 
     setTasks(tasks.filter((task) => task.id !== id));
   };
 
   // Toggle Reminder
   const toggleReminder = async (id) => {
+    const taskToToggle = await fetchTask(id);
+    const updatedTask = { ...taskToToggle, reminder: !taskToToggle.reminder };
 
-    const taskToToggle = await fetchTask(id)
-    const updatedTask = {...taskToToggle, reminder: !taskToToggle.reminder}
+    const res = await fetch(`http://localhost:5000/tasks/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify(updatedTask),
+    });
 
-    const res = await fetch(`http://localhost:5000/tasks/${id}`,{
-    method: "PUT",
-    headers:{
-      "Content-type":"application/json"
-    },
-    body: JSON.stringify(updatedTask)
-  })
-
-  const data = await res.json()
-
+    const data = await res.json();
 
     setTasks(
       tasks.map((task) =>
@@ -86,18 +80,40 @@ function App() {
   };
 
   return (
-    <div className="container">
-      <Header
-        onShowAdd={() => setShowAddTask(!showAddTask)}
-        onShow={showAddTask}
-      />
-      {showAddTask && <AddTask onAdd={addTask} />}
-      {tasks.length > 0 ? (
-        <Tasks tasks={tasks} onDelete={deleteTask} onToggle={toggleReminder} />
-      ) : (
-        "No Tasks to Show"
-      )}
-    </div>
+    <Router>
+      <div className="container">
+        <Header
+          onShowAdd={() => setShowAddTask(!showAddTask)}
+          onShow={showAddTask}
+        />
+
+        <Routes>
+          <Route
+            path="/"
+            exact
+            element={
+              <>
+                {showAddTask && <AddTask onAdd={addTask} />}
+                {tasks.length > 0 ? (
+                  <Tasks
+                    tasks={tasks}
+                    onDelete={deleteTask}
+                    onToggle={toggleReminder}
+                  />
+                ) : (
+                  "No Tasks to Show"
+                )}
+              </>
+            }
+          />
+        </Routes>
+
+        <Routes>
+          <Route path="/about" Component={About} />
+        </Routes>
+        <Footer />
+      </div>
+    </Router>
   );
 }
 
